@@ -5,12 +5,20 @@ from scipy import stats
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 
-def access(dbname, user, edge_id):
+def access(dbname, user, edge_id, week_day):
     conn = psycopg2.connect("dbname="+dbname+" user="+user)
     curs = conn.cursor()
-    curs.execute("SELECT * FROM public.speed_observations where avg_speed_ms < 100 and edge_id_gh="+edge_id+" order by edge_id_gh")
+    curs.execute("SELECT * FROM public.speed_observations_june where avg_speed_ms < 100 and edge_id_gh="+edge_id+" and day_of_week="+week_day+" order by edge_id_gh")
     x= curs.fetchall()
-    df = pd.DataFrame(x, columns=['edge','date','speed','from','to'])
+    df = pd.DataFrame(x, columns=['traj_id','edge','date','speed','week_day'])
+    return df
+
+def access_hour(dbname, user, edge_id, week_day, min_hour, max_hour):
+    conn = psycopg2.connect("dbname="+dbname+" user="+user)
+    curs = conn.cursor()
+    curs.execute("SELECT * FROM public.speed_observations_june where avg_speed_ms < 100 and edge_id_gh="+edge_id+" and day_of_week="+week_day+" and date_part('hour' , start_time) <"+max_hour+" and date_part('hour' , start_time)>="+min_hour+" order by edge_id_gh")
+    x= curs.fetchall()
+    df = pd.DataFrame(x, columns=['traj_id','edge','date','speed','week_day'])
     return df
 
 
